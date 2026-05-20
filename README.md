@@ -1,34 +1,72 @@
-# p16-CDK6 Interaction Redesign Pipeline
+# p16-CDK6 Computational Interaction Redesign Pipeline
 
-This repository contains the computational pipeline and structural data for the redesign and optimization of a p16INK4a-mimetic peptide targeting CDK6. 
+This repository contains an automated screening and structural biology pipeline designed to optimize a p16INK4a-mimetic peptide targeting the oncogenic CDK6 interface. 
 
-As an Embedded Systems student, I developed this workflow to apply technical system optimization and pipeline automation principles to structural biology, utilizing AI-assisted deep learning tools.
+As an Embedded Systems student, I engineered this workflow to apply pipeline automation, large-scale screening architectures, and data-driven filtering to structural bioinformatics problems.
 
-## 🛠 The Pipeline Workflow
+---
 
-The project avoids simple fragment matching by executing a rigorous three-step computational pipeline to alter and optimize the interface sequence:
+## 🛠 Repository Architecture
 
-1. **Sequence Redesign (ProteinMPNN):** The native p16INK4a backbone was used as a template. ProteinMPNN was deployed to perform target-focused sequence redesign at the interaction interface, optimizing for higher energetic stability and binding affinity.
-2. **Structure Validation (ESMFold):** The newly generated sequences were folded de-novo using ESMFold to verify that the mutated peptides successfully adopt the required secondary structure without losing integrity.
-3. **Rigid-Body Docking (LightDock):** The folded champion candidate was docked against the regulatory ankyrin-repeat interface of CDK6 to simulate the binding pose and evaluate surface complementarity.
-
-## 📊 Key Results
-
-- **Interface Complementarity:** The final "champion" candidate isolated via PyMOL shows an exceptional fit into the CDK6 catalytic loop.
-- **Atomic Contacts:** **273 atom-to-atom contacts** identified within a 3.5 Å threshold.
-- **Interaction Network:** Enhanced hydrogen-bonding networks compared to the native wild-type p16 sequence.
-
-## 📁 Repository Structure
+The repository is split into two logical domains:
+1. **The Pipeline (`/data` & `/scripts`):** A fully operational, executable environment. Anyone downloading this repository can run the scripts sequentially using the provided input baseline data to reproduce the workflow.
+2. **The Showcase (`/results`):** Contains the pre-calculated structural files, sequences, and analytics of my successful "Champion" candidate from the p16-CDK6 optimization run.
 
 ```text
-├── data/
-│   ├── native_p16.fasta          # Original wild-type sequence
-│   ├── redesigned_p16.fasta      # Optimized ProteinMPNN sequence
-│   ├── esmfold_prediction.pdb    # Folded structure of the redesigned peptide
-│   └── final_complex_docked.pdb  # Top-scoring LightDock cluster complex
-├── scripts/
-│   ├── run_proteinmpnn.sh        # Bash wrapper/parameters for sequence generation
-│   ├── run_lightdock.sh          # LightDock simulation setup and execution
-│   └── interface_analysis.pml    # PyMOL script used for contact calculation
-└── visuals/
-    └── cdk6_interface_render.png # High-resolution PyMOL interface rendering
+├── data/                      # Base input structures for the execution run
+│   ├── p16_backbone.pdb       # Mutational template structure
+│   ├── cdk6_receptor.pdb      # Target receptor for docking
+│   └── fixed_positions.jsonl  # Scripted amino acid locking mapping
+├── scripts/                   # Executable automation logic
+│   ├── 1_run_proteinmpnn.sh   # High-throughput sequence design (10k generation)
+│   ├── 2_run_esmfold.py       # High-throughput batch de-novo folding (200 runs)
+│   └── 3_run_lightdock.sh     # Rigid-body interaction simulation (10 parallel runs)
+└── results/                   # Verified data from my primary champion candidate
+    ├── champion_sequence.fasta# Optimized p16 binding sequence
+    ├── p16_CDK6_bestdock.pdb  # De-novo ESMFold structure of the optimized peptide
+    ├── final_docked_complex.pdb # Top-scoring LightDock interaction complex (Swarm 54)
+    └── interface_render.png   # High-res PyMOL rendering highlighting hot-spots
+⚙️ Installation & Dependencies
+The pipeline is optimized for Python 3.8+ running on a Linux native environment or virtual machines (e.g., elementary OS).
+
+Bash
+# 1. Setup virtual environment
+python3 -m venv bio_env
+source bio_env/bin/activate
+
+# 2. Install core science stacks & tools
+pip install numpy torch biopython requests lightdock
+git clone [https://github.com/dauparas/ProteinMPNN.git](https://github.com/dauparas/ProteinMPNN.git) && cd ProteinMPNN && pip install -e . && cd ..
+pip install git+[https://github.com/facebookresearch/esm.git](https://github.com/facebookresearch/esm.git)
+💻 Running the Pipeline (Step-by-Step)
+Executing these three files in sequence drives raw inputs from the /data directory through the entire computational screening cascade:
+
+Step 1: Sequence Optimization (ProteinMPNN)
+Generates 10,000 unique sequences based on the geometric framework of the p16 backbone, filters them programmatically by energy stability, and exports the top 200 candidates.
+
+Bash
+bash ./scripts/1_run_proteinmpnn.sh
+Output: ./data/top_200_redesigned.fasta
+
+Step 2: High-Throughput Folding (ESMFold)
+Batch-processes the 200 filtered sequences, running neural network structure prediction to fold them into structural PDB assets.
+
+Bash
+python ./scripts/2_run_esmfold.py
+Output Ordner: ./data/esmfold_structures/ (Contains peptide_1.pdb to peptide_200.pdb)
+
+Step 3: Interaction Simulation (LightDock)
+Isolates the top 10 structural candidates and docks them via rigid-body simulations against the cdk6_receptor.pdb. It utilizes DFIRE scoring, extracts the top-ranked models out of the primary interaction swarms, and cleans up temporary spaces.
+
+Bash
+bash ./scripts/3_run_lightdock.sh
+Output Ordner: ./data/final_results/ (Contains complex_peptide_1.pdb to complex_peptide_10.pdb)
+
+📊 My Champion Results Highlights (/results)
+The data preserved within the /results folder represents the verified champion candidate from my engineering run:
+
+Structure Prediction: p16_CDK6_bestdock.pdb was isolated as the optimal stable structural fold.
+
+Interface Complementarity: Rigid-body docking simulation within the regulatory ankyrin-repeat interface yielded 273 atom-to-atom contacts at a 3.5 Å threshold.
+
+Biocompatibility: Features an upgraded hydrogen-bonding web compared to wild-type p16, indicating strong therapeutic promise.
