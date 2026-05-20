@@ -1,30 +1,39 @@
+#!/usr/bin/env python3
 import torch
 import esm
 import os
-import sys
 
-def predict_structure(fasta_path, output_pdb_path):
-    print(f"Lese Sequenz aus: {fasta_path}")
+def main():
+    print("=== Schritt 2: ESMFold ($200$ Faltungen) ===")
+    
+    fasta_input = "./data/top_200_redesigned.fasta"
+    output_dir = "./data/esmfold_structures"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    if not os.path.exists(fasta_input):
+        print(f"Fehler: {fasta_input} fehlt.")
+        return
+
+    print("Lade ESMFold-Modell...")
     model = esm.pretrained.esmfold_v1().eval().cuda()
 
-    with open(fasta_path, 'r') as f:
-        lines = f.readlines()
-        sequence = "".join([line.strip() for line in lines if not line.startswith(">")])
+    with open(fasta_input, 'r') as f:
+        entries = f.read().split('>')[1:]
 
-    print("Berechne Faltung via ESMFold...")
-    with torch.no_grad():
-        output = model.infer_pdb(sequence)
+    print(f"Starte Faltung von {len(entries)} Sequenzen...")
+    for idx, entry in enumerate(entries):
+        lines = entry.strip().split('\n')
+        header = lines[0]
+        sequence = "".join(lines[1:])
+        
+        # Jede Struktur bekommt eine eindeutige ID im Dateinamen
+        pdb_output_path = os.path.join(output_dir, f"peptide_{idx+1}.pdb")
+        
+        print(f"[{idx+1}/200] Falte Peptid_{idx+1}...")
+        with torch.no_grad():
+            output = model.infer_pdb(sequence)
 
-    with open(output_pdb_path, "w") as f:
-        f.write(output)
-    print(f"Struktur erfolgreich gespeichert unter: {output_pdb_path}")
-
-if __name__ == "__main__":
-    # Standardpfade für den Nutzer der Anleitung
-    FASTA_INPUT = "./data/redesigned_peptide.fasta"
-    PDB_OUTPUT = "./data/esmfold_prediction.pdb"
-    
-    if os.path.exists(FASTA_INPUT):
-        predict_structure(FASTA_INPUT, PDB_OUTPUT)
-    else:
-        print(f"Fehler: {FASTA_INPUT} nicht gefunden.")
+        with open(pdb_output_path, "w") as f:
+            f.write(output)
+            
+    print(f"Alle 200 Strukturen gespeichert in: {output_dir}/")
