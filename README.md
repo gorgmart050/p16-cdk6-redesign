@@ -9,9 +9,10 @@ As an Embedded Systems student, I engineered this workflow to apply pipeline aut
 ## 🛠 Repository Architecture
 
 The repository is split into two logical domains:
-1. **The Pipeline (/data & /scripts):** A fully operational, executable environment. Anyone downloading this repository can run the scripts sequentially using the provided input baseline data to reproduce the workflow.
-2. **The Showcase (/results):** Contains the pre-calculated structural files, sequences, and analytics of my successful "Champion" candidate from the p16-CDK6 optimization run.
+1. **The Pipeline (`/data` & `/scripts`):** A fully operational, executable environment. Anyone downloading this repository can run the scripts sequentially using the provided input baseline data to reproduce the workflow.
+2. **The Showcase (`/results`):** Contains the pre-calculated structural files, sequences, and analytics of my successful "Champion" candidate from the p16-CDK6 optimization run.
 
+```text
 ├── data/                      # Base input structures for the execution run
 │   ├── p16_backbone.pdb       # Mutational template structure
 │   ├── cdk6_receptor.pdb      # Target receptor for docking
@@ -25,6 +26,7 @@ The repository is split into two logical domains:
     ├── p16_CDK6_bestdock.pdb  # De-novo ESMFold structure of the optimized peptide
     ├── final_docked_complex.pdb # Top-scoring LightDock interaction complex (Swarm 54)
     └── interface_render.png   # High-res PyMOL rendering highlighting hot-spots
+...
 ---
 
 ## ⚙️ Installation & Dependencies
