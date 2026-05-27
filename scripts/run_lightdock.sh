@@ -16,18 +16,32 @@ do
 
     echo "Docking Run $i/10 für peptide_${i}.pdb..."
     RUN_DIR="./docking_run_${i}"
-    mkdir -p "$RUN_DIR" && cp "$RECEPTOR" "$RUN_DIR/" && cp "$LIGAND" "$RUN_DIR/" && cd "$RUN_DIR"
+    mkdir -p "$RUN_DIR"
+    cp "$RECEPTOR" "$RUN_DIR/"
+    cp "$LIGAND" "$RUN_DIR/"
 
-    lightdock3_setup.py ./cdk6_receptor.pdb "./peptide_${i}.pdb" -s 100 -g 200 --noxt --noh
+    pushd "$RUN_DIR" > /dev/null
+
+    lightdock3_setup.py cdk6_receptor.pdb "peptide_${i}.pdb" -s 25 -g 200 --noxt --noh
     lightdock3.py setup.json 200 -c 4 -s dfire
-    lgd_cluster.py setup.json generate_lightdock.list 100 200
 
-    # Retten des "Champions" aus dem biologischen Hotspot (Swarm 54) nach /data/final_results
-    if [ -d "./swarm_54" ]; then
-        cp ./swarm_54/lightdock_0.pdb "../$FINAL_DIR/complex_peptide_${i}.pdb"
+    # Konformationen für alle Swarms generieren
+    for swarm_dir in swarm_*/; do
+        lgd_generate_conformations.py setup.json "$swarm_dir" 200
+    done
+
+    # Bestes Modell anhand DFIRE-Score auswählen
+    lgd_cluster_binder.py setup.json
+
+    BEST=$(ls swarm_*/lightdock_*.pdb 2>/dev/null | head -1)
+    if [ -n "$BEST" ]; then
+        cp "$BEST" "../$FINAL_DIR/complex_peptide_${i}.pdb"
     else
-        cp ./swarm_0/lightdock_0.pdb "../$FINAL_DIR/complex_peptide_${i}.pdb"
+        echo "Warnung: Kein Docking-Ergebnis für peptide_${i}.pdb"
     fi
-    cd .. && rm -rf "$RUN_DIR"
+
+    popd > /dev/null
+    rm -rf "$RUN_DIR"
 done
-echo "Pipeline beendet. Die 10 fertigen Komplexe liegen in: $FINAL_DIR/"
+
+echo "Pipeline beendet. Die fertigen Komplexe liegen in: $FINAL_DIR/"

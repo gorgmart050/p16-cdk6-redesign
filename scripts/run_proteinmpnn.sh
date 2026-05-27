@@ -2,6 +2,7 @@
 # Input: ./data/p16_backbone.pdb + ./data/fixed_positions.jsonl
 # Output: Erstellt 10.000 Sequenzen und filtert die Top 200 nach /data
 
+MPNN_DIR="/home/georg/ProteinMPNN"
 INPUT_PDB="./data/p16_backbone.pdb"
 FIXED_JSON="./data/fixed_positions.jsonl"
 OUTPUT_DIR="./data/mpnn_outputs"
@@ -9,9 +10,8 @@ TOP_200_FASTA="./data/top_200_redesigned.fasta"
 
 echo "=== Schritt 1: ProteinMPNN (10.000 Sequenzen) ==="
 
-python protein_mpnn_run.py \
+python "$MPNN_DIR/protein_mpnn_run.py" \
     --pdb_path "$INPUT_PDB" \
-    --pdb_path_chains "B" \
     --fixed_positions_jsonl "$FIXED_JSON" \
     --out_folder "$OUTPUT_DIR" \
     --num_seq_per_target 10000 \
