@@ -76,3 +76,9 @@ The data preserved within the /results_p16_cdk6 folder represents the verified c
 - **Structure Prediction:** `esmfold_prediction.pdb` was isolated as the optimal stable structural fold.
 - **Interface Complementarity:** Rigid-body docking simulation within the regulatory ankyrin-repeat interface yielded 273 atom-to-atom contacts at a 3.5 Å threshold.
 - **Biocompatibility:** Features an upgraded hydrogen-bonding web compared to wild-type p16, indicating strong therapeutic promise.
+
+---
+
+## Contact
+
+**Contact:** Georg — georgmartazov@gmail.com
